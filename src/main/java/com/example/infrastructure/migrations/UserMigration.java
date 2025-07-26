@@ -47,7 +47,7 @@ public class UserMigration extends Migration {
             boolean isHeader = true;
             int processedLines = 0;
 
-            while ((line = reader.readLine()) != null) {
+            while (reader != null && (line = reader.readLine()) != null) {
                 if (isHeader) {
                     isHeader = false; // skip header line: id,name,email,role
                     continue;
