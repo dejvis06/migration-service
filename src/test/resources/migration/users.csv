@@ -1,0 +1,12 @@
+id,name,email,role
+1,John Doe,john@example.com,ADMIN
+2,Jane Smith,jane@example.com,USER
+3,Bob Brown,bob@example.com,USER
+4,Alice Johnson,alice@example.com,ADMIN
+5,Charlie Davis,charlie@example.com,USER
+6,Eva Williams,eva@example.com,USER
+7,Frank Miller,frank@example.com,ADMIN
+8,Grace Lee,grace@example.com,USER
+9,Henry Clark,henry@example.com,USER
+10,Ivy Lewis,ivy@example.com,ADMIN
+11,Yo Yo,yoyo@example.com,USER
