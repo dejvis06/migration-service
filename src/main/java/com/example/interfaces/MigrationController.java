@@ -1,6 +1,6 @@
 package com.example.interfaces;
 
-import com.example.infrastructure.MigrationSession;
+import com.example.application.MigrationSession;
 import com.example.infrastructure.migrations.UserMigration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,15 +14,12 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 @RestController
 @RequestMapping("/migration")
 public class MigrationController {
 
     private static final Logger log = LoggerFactory.getLogger(MigrationController.class);
-    private final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
     private MigrationSession currentSession;
 
@@ -31,7 +28,7 @@ public class MigrationController {
         SseEmitter emitter = new SseEmitter();
 
         CompletableFuture.runAsync(() -> {
-            try (MigrationSession session = new MigrationSession(new UserMigration(), executorService)) {
+            try (MigrationSession session = new MigrationSession(new UserMigration())) {
                 log.info("Migration session started for client.");
 
                 this.currentSession = session;
