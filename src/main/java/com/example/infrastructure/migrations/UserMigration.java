@@ -21,6 +21,8 @@ public class UserMigration extends Migration {
     private BufferedReader reader;
     private BufferedReader counter;
 
+    private boolean batchReady = false;
+    private static final int BATCH_SIZE = 500;
     private final List<User> users = new ArrayList<>();
 
     public UserMigration() {
@@ -57,6 +59,16 @@ public class UserMigration extends Migration {
                 processedLines++;
                 setPercentage(processedLines, totalLines);
 
+                // Mark batch ready if it hits size
+                if (users.size() == BATCH_SIZE) {
+                    batchReady = true;
+                    // Pause loop until app layer empties the list
+                    synchronized (this) {
+                        while (batchReady) {
+                            wait();   // wait for signal from app layer
+                        }
+                    }
+                }
                 Thread.sleep(1000);
             }
             this.active = false;
@@ -90,6 +102,22 @@ public class UserMigration extends Migration {
         } catch (Exception e) {
             errors.add(new WarningMigrationError("Failed to parse line: " + line));
         }
+    }
+
+    public boolean isBatchReady() {
+        return batchReady;
+    }
+
+    public synchronized List<User> drainBatch() {
+        List<User> drained = new ArrayList<>(users);
+        users.clear();
+        batchReady = false;
+        notify();
+        return drained;
+    }
+
+    public List<User> getRemainingUsers() {
+        return new ArrayList<>(users);
     }
 
     @Override

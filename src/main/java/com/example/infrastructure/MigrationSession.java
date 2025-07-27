@@ -40,4 +40,8 @@ public class MigrationSession implements AutoCloseable {
         log.info("Closing MigrationSession");
         migration.shutdown();
     }
+
+    public Migration getMigration() {
+        return migration;
+    }
 }
