@@ -1,6 +1,6 @@
 package com.example.interfaces;
 
-import com.example.application.MigrationSession;
+import com.example.infrastructure.MigrationSession;
 import com.example.infrastructure.migrations.UserMigration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -1,6 +1,6 @@
-package com.example.application;
+package com.example.infrastructure.migrations;
 
-import com.example.infrastructure.migrations.Migration;
+import com.example.infrastructure.MigrationSession;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;

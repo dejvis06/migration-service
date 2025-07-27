@@ -1,4 +1,4 @@
-package com.example.application;
+package com.example.infrastructure;
 
 import com.example.domain.model.error.MigrationError;
 import com.example.infrastructure.migrations.Migration;
