@@ -14,7 +14,7 @@ public class MigrationSession implements AutoCloseable {
     private static final Logger log = LoggerFactory.getLogger(MigrationSession.class);
 
     private final Migration migration;
-    private final ExecutorService executor = Executors.newSingleThreadExecutor();
+    private static final ExecutorService executor = Executors.newSingleThreadExecutor();
 
     public MigrationSession(Migration migration) {
         this.migration = migration;
