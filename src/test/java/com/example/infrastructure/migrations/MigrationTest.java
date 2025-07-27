@@ -31,7 +31,7 @@ class MigrationTest {
         // run migration (sets percentage)
         migration.run();
 
-        assertEquals(50.0, migration.getProgressPercentage());
+        assertEquals(50.0, migration.getPercentage());
     }
 
     @Test

@@ -12,7 +12,7 @@ public abstract class Migration implements Runnable {
     protected double percentage = 0.0;
     protected final List<MigrationError> errors = Collections.synchronizedList(new ArrayList<>());
 
-    public double getProgressPercentage() {
+    public double getPercentage() {
         return percentage;
     }
 

@@ -35,7 +35,7 @@ public class MigrationService {
 
             while (true) {
                 try {
-                    Thread.sleep(1000); // ✅ simulate migration work
+                    //Thread.sleep(1000); // ✅ simulate migration work
 
                     if (!session.isActive()) {
                         break; // ✅ exit immediately, don’t send again
@@ -52,11 +52,11 @@ public class MigrationService {
                         log.info("Persisting batch.");
                     }
 
-                } catch (InterruptedException e) {
+                } /* catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                     log.warn("Migration worker interrupted");
                     break;
-                } catch (IOException e) {
+                }*/ catch (IOException e) {
                     log.error("Client disconnected or send failed", e);
                     break;
                 }

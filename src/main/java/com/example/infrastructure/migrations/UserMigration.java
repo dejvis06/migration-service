@@ -55,9 +55,12 @@ public class UserMigration extends Migration {
                     continue;
                 }
                 processLine(line);
-
                 processedLines++;
-                setPercentage(processedLines, totalLines);
+
+                synchronized (this) {
+                    setPercentage(processedLines, totalLines);
+                    notify();
+                }
 
                 // Mark batch ready if it hits size
                 if (users.size() == BATCH_SIZE) {
@@ -69,7 +72,7 @@ public class UserMigration extends Migration {
                         }
                     }
                 }
-                Thread.sleep(1000);
+                //Thread.sleep(1000);
             }
             this.active = false;
             log.info(users.toString());
@@ -94,11 +97,6 @@ public class UserMigration extends Migration {
             Role role = Role.valueOf(parts[3].trim().toUpperCase());
 
             users.add(new User(id, name, email, role));
-
-            percentage = users.size(); // update progress placeholder
-            if (percentage >= 90) {
-                errors.add(new WarningMigrationError("File warning: Near completion"));
-            }
         } catch (Exception e) {
             errors.add(new WarningMigrationError("Failed to parse line: " + line));
         }

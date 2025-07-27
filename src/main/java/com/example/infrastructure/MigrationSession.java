@@ -24,7 +24,7 @@ public class MigrationSession implements AutoCloseable {
     }
 
     public double getProgressPercentage() {
-        return migration.getProgressPercentage();
+        return migration.getPercentage();
     }
 
     public boolean isActive() {
