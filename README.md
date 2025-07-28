@@ -18,57 +18,72 @@ Perfect for progress bars, notifications, or logs — cases where the user only 
 ```java
 @GetMapping("/run")
 public SseEmitter run() {
-    SseEmitter emitter = new SseEmitter();
+  SseEmitter emitter = new SseEmitter();
 
-    CompletableFuture.runAsync(() -> {
-        try (MigrationSession session = new MigrationSession(new UserMigration())) {
-            log.info("Migration session started for client.");
-
-            this.currentSession = session;
-
-            while (true) {
-                try {
-                    Thread.sleep(1000); // ✅ simulate migration work
-
-                    if (!session.isActive()) {
-                        break; // ✅ exit immediately, don’t send again
-                    }
-
-                    double percentage = session.getProgressPercentage();
-                    emitter.send(percentage);   // ✅ flush each update
-                    log.info("Sent update {} to client.", percentage);
-
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    log.warn("Migration worker interrupted");
-                    break;
-                } catch (IOException e) {
-                    log.error("Client disconnected or send failed", e);
-                    break;
-                }
-            }
-
-            emitter.send(-1); // ✅ signal finished
-            emitter.complete();
-            log.info("Migration session complete.");
-        } catch (IOException e) {
-            log.error("Failed to send completion event", e);
-            emitter.completeWithError(e);
-        }
-        this.currentSession = null;
-    });
-
-    return emitter;
+  CompletableFuture.runAsync(() -> migrationService.run(emitter));
+  return emitter;
 }
 
 @PostMapping("/cancel")
 public ResponseEntity<String> cancelMigration() {
-    if (currentSession != null) {
-        currentSession.close();   // ✅ stops the worker & cleans up
-        currentSession = null;
-        return ResponseEntity.ok("Migration canceled.");
+  boolean canceled = migrationService.cancel();
+  if (canceled) {
+    return ResponseEntity.ok("Migration canceled.");
+  }
+  return ResponseEntity.status(HttpStatus.CONFLICT)
+          .body("No active migration to cancel.");
+}
+
+public void run(SseEmitter emitter) {
+  try (MigrationSession session = new MigrationSession(new UserMigration())) {
+
+    this.currentSession = session;
+    log.info("Migration session started for client.");
+
+    UserMigration migration = (UserMigration) session.getMigration();
+
+    while (true) {
+      try {
+        //Thread.sleep(1000); // ✅ simulate migration work
+
+        if (!session.isActive()) {
+          break; // ✅ exit immediately, don’t send again
+        }
+
+        double percentage = session.getProgressPercentage();
+        emitter.send(percentage);   // ✅ flush each update
+        log.info("Sent update {} to client.", percentage);
+
+        if (migration.isBatchReady()) {
+          // ✅ Retrieve and clear the batch
+          List<User> batch = migration.drainBatch();
+          // Persist batch
+          log.info("Persisting batch.");
+        }
+
+      } /* catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    log.warn("Migration worker interrupted");
+                    break;
+                }*/ catch (IOException e) {
+        log.error("Client disconnected or send failed", e);
+        break;
+      }
     }
-    return ResponseEntity.status(HttpStatus.CONFLICT)
-            .body("No active migration to cancel.");
+
+    // ✅ Process any leftover users after file is fully read
+    List<User> remaining = migration.getRemainingUsers();
+    if (!remaining.isEmpty()) {
+      // Persist batch
+      log.info("Persisting remaining batch.");
+    }
+
+    emitter.send(-1); // ✅ signal finished
+    emitter.complete();
+    log.info("Migration session complete.");
+  } catch (IOException e) {
+    log.error("Failed to send completion event", e);
+    emitter.completeWithError(e);
+  }
 }
 ```

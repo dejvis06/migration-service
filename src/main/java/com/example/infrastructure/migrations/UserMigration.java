@@ -27,7 +27,7 @@ public class UserMigration extends Migration {
 
     public UserMigration() {
         try {
-            ClassPathResource resource = new ClassPathResource("migration/users.csv");
+            ClassPathResource resource = new ClassPathResource("migration/users_large_500k.csv");
 
             this.reader = new BufferedReader(new InputStreamReader(resource.getInputStream()));
             this.counter = new BufferedReader(new InputStreamReader(resource.getInputStream()));
@@ -57,10 +57,7 @@ public class UserMigration extends Migration {
                 processLine(line);
                 processedLines++;
 
-                synchronized (this) {
-                    setPercentage(processedLines, totalLines);
-                    notify();
-                }
+                setPercentage(processedLines, totalLines);
 
                 // Mark batch ready if it hits size
                 if (users.size() == BATCH_SIZE) {
